@@ -2,13 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Task;
+use App\Http\Services\TaskManagerService;
 use App\TaskCategory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redirect;
-use Symfony\Component\Console\Input\Input;
-use TaskManagerService;
 
 class TaskManagerController extends Controller
 {
@@ -46,8 +42,9 @@ class TaskManagerController extends Controller
     public function store(Request $request)
     {
         $taskManagerService = new TaskManagerService();
-        $data = $request->all();
-        return $taskManagerService->createTask($data['taskname'], $data['categories']);     
+        $data = $request->get('data');
+
+        return $taskManagerService->createTask($data);     
     }
 
     /**

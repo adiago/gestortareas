@@ -99,7 +99,6 @@
             </div>
             </form>
             <div class="row">
-                    {{json_encode($tasks)}}
                 <div class="col-md-12">
                     <table class="table table-striped">
                         <thead>
@@ -110,13 +109,13 @@
                         </tr>
                         </thead>
                         <tbody>
-                            {{-- @foreach($tasks as $task)
+                            @foreach($tasks as $task)
                                 <tr>
                                     <td>{{$task->title}}</td>
-                                    <td>{{json_encode($task->category)}}</td>
+                                    <td>{{$task->category}}</td>
                                     <td><i class="fa fa-window-close"></i></td>
                                 </tr>
-                        @endforeach --}}
+                        @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -124,9 +123,6 @@
     </body>
 </html>
 <script>
-    // function addTask() {
-    //     alert('hehe');
-    // }
 
     $('#add').click(function(e) {
         $.ajaxSetup({
@@ -134,9 +130,9 @@
         });
         let data = {
             'taskname': $('#taskname').val(),
-            'php': $('#php').val(),
-            'css': $('#css').val(),
-            'js': $('#js').val(),
+            'php': $('#php').prop('checked'),
+            'css': $('#css').prop('checked'),
+            'js': $('#js').prop('checked')
         }
         
         if(!validateForm(data)) {
@@ -144,7 +140,7 @@
             return;
         }
 
-        $.post('/store-task', {data: data}, function(response){
+        $.post('/store-task', {data}, function(response){
             alert('post ok')
         });
 
