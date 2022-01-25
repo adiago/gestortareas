@@ -16,4 +16,5 @@ use Illuminate\Support\Facades\Route as Route;
 Route::get('/', 'TaskManagerController@index');
 
 Route::post('store-task', 'TaskManagerController@store');
+Route::post('delete-task/{id}', 'TaskManagerController@destroy');
 

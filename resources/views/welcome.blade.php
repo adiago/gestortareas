@@ -21,113 +21,75 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
         <!-- Styles -->
         <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Nunito', sans-serif;
-                font-weight: 200;
-                height: 100vh;
-                margin: 0;
-            }
-
-            .full-height {
-                height: 100vh;
-            }
-
-            .flex-center {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-            }
-
-            .position-ref {
-                position: relative;
-            }
-
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
-
-            .content {
-                text-align: center;
-            }
-
-            .title {
-                font-size: 84px;
-            }
-
-            .links > a {
-                color: #636b6f;
-                padding: 0 25px;
-                font-size: 13px;
-                font-weight: 600;
-                letter-spacing: .1rem;
-                text-decoration: none;
-                text-transform: uppercase;
-            }
-
-            .m-b-md {
-                margin-bottom: 30px;
-            }
+            .center50{margin:0 auto; width: 50%}
         </style>
     </head>
     <body>
         <div class="container">
-            <div class="row">
+            <div class="row center50">
                 <h1>Gestor de tareas</h1>
+                <hr>
             </div>
-            <form method="POST" action="store-task" id="form-task">
-            @csrf
-            <div class="row">
-                <div class="col-md-6">
-                    {!! Form::text('taskname', null, ['placeholder'=>'Nueva tarea...', 'id'=>'taskname']) !!}
-                </div>
-                <div class="col-md-6">
-                    <label ref="php">PHP</label>
-                    {!! Form::checkbox('php', 1, false, ['id'=>'php']) !!}
         
-                    <label ref="js">Javascript</label>
-                    {!! Form::checkbox('js', 1, false, ['id'=>'js']) !!}
+            <div class="row center50">
+                <form method="POST" action="store-task" id="form-task">
+                    @csrf
+        
+                    <div class="col-md-6">
+                        {!! Form::text('taskname', null, ['placeholder'=>'Nueva tarea...', 'id'=>'taskname']) !!}
+                    </div>
+                    <div class="col-md-6">
+                        <label ref="php">PHP</label>
+                        {!! Form::checkbox('php', 1, false, ['id'=>'php']) !!}
+            
+                        <label ref="js">Javascript</label>
+                        {!! Form::checkbox('js', 1, false, ['id'=>'js']) !!}
 
-                    <label ref="php">CSS</label>
-                    {!! Form::checkbox('css', 1, false, ['id'=>'css']) !!}
+                        <label ref="php">CSS</label>
+                        {!! Form::checkbox('css', 1, false, ['id'=>'css']) !!}
 
-                    {!! Form::button('Añadir', ['id'=>'add']) !!}
-                </div>
+                        {!! Form::button('Añadir', ['id'=>'add']) !!}
+                    </div>
+                </form>
+
             </div>
-            </form>
-            <div class="row">
+            <div class="row center50">
                 <div class="col-md-12">
-                    <table class="table table-striped">
+                    <table class="table table-striped" id="tasks-table">
                         <thead>
-                        <tr>
-                            <th scope="col">Tarea</th>
-                            <th scope="col">Categorías</th>
-                            <th scope="col">Acciones</th>
-                        </tr>
+                            <tr>
+                                <th scope="col">Tarea</th>
+                                <th scope="col">Categorías</th>
+                                <th scope="col">Acciones</th>
+                            </tr>
                         </thead>
                         <tbody>
                             @foreach($tasks as $task)
-                                <tr>
+                                <tr id="{{$task->id}}">
                                     <td>{{$task->title}}</td>
-                                    <td>{{$task->category}}</td>
-                                    <td><i class="fa fa-window-close"></i></td>
+                                    <td>
+                                        @foreach($task->categories as $cat){{$cat->name}} @endforeach
+                                    </td>
+                                    <td>
+                                        <button type="button" class="close" aria-label="Close" onclick="deletetask({{$task->id}})">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </td>
                                 </tr>
-                        @endforeach
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
             </div>
+        </div>
     </body>
 </html>
 <script>
-
-    $('#add').click(function(e) {
-        $.ajaxSetup({
+    $.ajaxSetup({
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
         });
+    $('#add').click(function(e) {
+       
         let data = {
             'taskname': $('#taskname').val(),
             'php': $('#php').prop('checked'),
@@ -140,11 +102,38 @@
             return;
         }
 
-        $.post('/store-task', {data}, function(response){
-            alert('post ok')
+        $.post('/store-task', {data})
+        .done(function(response){
+            let categories = '';
+            response.categories.forEach(function(elem) {
+                categories += ' '+elem.name
+            })
+    
+            $('#tasks-table tr:last').after('<tr id="'+response.id+'">'+
+                '<td>'+response.title+'</td>'+
+                '<td>'+
+                    categories
+                    +'</td>'+
+                '<td class="text-justify-content-center">'+
+                    '<button type="button" class="close" aria-label="Close" onclick="deletetask('+response.id+')">'+
+                    '<span aria-hidden="true">&times;</span>'+
+                    '</button></td>'+
+            '</tr>');
+
+        }).fail(function() {
+            alert('Error al añadir');
+
         });
 
     });
+
+    function deletetask(id) {
+        $.post('/delete-task/'+id).done(function(response){
+            $('#'+id).remove();
+        }).fail(function() {
+            alert('Error al eliminar');
+        })
+    } 
 
     function validateForm(data) {
         if(data.taskname.trim() != '' && (data.php || data.css || data.js)) {
