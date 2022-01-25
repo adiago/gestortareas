@@ -19,7 +19,7 @@ class CreateCategoriesTable extends Migration
             $table->bigIncrements('id');
             $table->text('name');
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->default(DB::raw('NULL ON UPDATE CURRENT_TIMESTAMP'))->nullable();
+            $table->timestamp('updated_at')->useCurrent();
         });
 
         $initialCategories = ['PHP', 'Javascript', 'CSS'];

@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Task;
+use App\TaskCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
+use Symfony\Component\Console\Input\Input;
+use TaskManagerService;
 
 class TaskManagerController extends Controller
 {
@@ -13,7 +19,12 @@ class TaskManagerController extends Controller
      */
     public function index()
     {
-        //
+        $tasks = TaskCategory::select('task_category.id as id', 'tasks.title as title', 'categories.name as category')
+        ->leftJoin('tasks', 'tasks.id', '=', 'task_category.task_id')
+        ->leftJoin('categories', 'categories.id', '=', 'task_category.category_id')
+        ->get();
+
+        return view('welcome')->with('tasks', $tasks);
     }
 
     /**
@@ -34,7 +45,9 @@ class TaskManagerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $taskManagerService = new TaskManagerService();
+        $data = $request->all();
+        return $taskManagerService->createTask($data['taskname'], $data['categories']);     
     }
 
     /**

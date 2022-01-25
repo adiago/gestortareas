@@ -13,6 +13,7 @@
 
 use Illuminate\Support\Facades\Route as Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'TaskManagerController@index');
+
+Route::post('store-task', 'TaskManagerController@store');
+

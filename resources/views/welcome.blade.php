@@ -3,12 +3,22 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>Laravel</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;600&display=swap" rel="stylesheet">
 
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
         <!-- Styles -->
         <style>
             html, body {
@@ -64,25 +74,86 @@
         </style>
     </head>
     <body>
-    <div>
-        <h1>Gestor de tareas</h1>
-    </div>
-    <div class="col-md-12">
-        <div class=col-md-6">
-            {!! Form::text('new_task', null, ['placeholder'=>'Nueva tarea...', 'id'=>'new_task']) !!}
-        </div>
-        <div class="col-md-6">
-            <label ref="php">PHP</label>
-            {!! Form::checkbox('php', 1, false, ['id'=>'php']) !!}
+        <div class="container">
+            <div class="row">
+                <h1>Gestor de tareas</h1>
+            </div>
+            <form method="POST" action="store-task" id="form-task">
+            @csrf
+            <div class="row">
+                <div class="col-md-6">
+                    {!! Form::text('taskname', null, ['placeholder'=>'Nueva tarea...', 'id'=>'taskname']) !!}
+                </div>
+                <div class="col-md-6">
+                    <label ref="php">PHP</label>
+                    {!! Form::checkbox('php', 1, false, ['id'=>'php']) !!}
+        
+                    <label ref="js">Javascript</label>
+                    {!! Form::checkbox('js', 1, false, ['id'=>'js']) !!}
 
-            <label ref="js">Javascript</label>
-            {!! Form::checkbox('js', 1, false, ['id'=>'js']) !!}
+                    <label ref="php">CSS</label>
+                    {!! Form::checkbox('css', 1, false, ['id'=>'css']) !!}
 
-            <label ref="php">CSS</label>
-            {!! Form::checkbox('css', 1, false, ['id'=>'css']) !!}
-
-            {!! Form::button('Añadir', ['onclick'=>'addTask']) !!}
-        </div>
-    </div>
+                    {!! Form::button('Añadir', ['id'=>'add']) !!}
+                </div>
+            </div>
+            </form>
+            <div class="row">
+                    {{json_encode($tasks)}}
+                <div class="col-md-12">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">Tarea</th>
+                            <th scope="col">Categorías</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {{-- @foreach($tasks as $task)
+                                <tr>
+                                    <td>{{$task->title}}</td>
+                                    <td>{{json_encode($task->category)}}</td>
+                                    <td><i class="fa fa-window-close"></i></td>
+                                </tr>
+                        @endforeach --}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
     </body>
 </html>
+<script>
+    // function addTask() {
+    //     alert('hehe');
+    // }
+
+    $('#add').click(function(e) {
+        $.ajaxSetup({
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+        });
+        let data = {
+            'taskname': $('#taskname').val(),
+            'php': $('#php').val(),
+            'css': $('#css').val(),
+            'js': $('#js').val(),
+        }
+        
+        if(!validateForm(data)) {
+            alert('Error de validación')
+            return;
+        }
+
+        $.post('/store-task', {data: data}, function(response){
+            alert('post ok')
+        });
+
+    });
+
+    function validateForm(data) {
+        if(data.taskname.trim() != '' && (data.php || data.css || data.js)) {
+            return true
+        }
+        return false
+    }
+</script>
